@@ -65,6 +65,9 @@ class Crawler(object):
 			pass
 	
 	def visit_url_external(self, url, found_via):
+		if url in self.done:
+			return # no need to check for one url twice
+		
 		print("Trying external: %s" % url)
 		
 		request = urllib2.Request(url)
