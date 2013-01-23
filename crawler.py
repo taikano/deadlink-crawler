@@ -41,6 +41,9 @@ class Crawler(object):
 				self.visit_url(next_url)
 			except urllib2.URLError:
 				continue
+		
+		print("DEADLINKS")
+		print(self.deadlinks)
 	
 	def visit_url(self, url_tuple):
 		if self.url_match.search(url_tuple[0]):
