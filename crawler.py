@@ -3,6 +3,8 @@ import urllib2, urlparse
 import re
 import time
 
+# TODO: Do not apply wait time to external links
+
 class Crawler(object):
 	def __init__(self, init_url):
 		# A list of to be crawled urls, where the second element
