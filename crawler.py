@@ -2,6 +2,7 @@ from BeautifulSoup import BeautifulSoup
 import urllib2, urlparse
 import re
 import time
+import httplib
 
 # TODO: Do not apply wait time to external links
 
@@ -72,8 +73,8 @@ class Crawler(object):
 		request = urllib2.Request(url)
 		
 		try:
-			response = urllib2.urlopen(request)
-		except urllib2.HTTPError:
+			response = urllib2.urlopen(request, None, 10)
+		except (urllib2.HTTPError, httplib.BadStatusLine):
 			# We receive an exception in case of 404
 			self.add_to_deadlinks(url, found_via)
 			return
