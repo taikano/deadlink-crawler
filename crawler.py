@@ -12,7 +12,7 @@ class Crawler(object):
 		self.pages = [(init_url, None)]
 		
 		# Urls we have already visited
-		self.done = set()
+		self.found = set()
 		
 		# List of deadlinks for each URL we have,
 		# i.e. url1: [deadlink1, deadlink2]
@@ -41,8 +41,6 @@ class Crawler(object):
 				self.visit_url(next_url)
 			except urllib2.URLError:
 				continue
-			finally:
-				self.done.add(next_url)
 	
 	def visit_url(self, url_tuple):
 		if self.url_match.search(url_tuple[0]):
@@ -59,15 +57,13 @@ class Crawler(object):
 			for page in self.extract_urls(html):
 				page = urlparse.urljoin(url, page)
 				
-				if not page in self.done:
+				if not page in self.found:
 					self.pages.append((page, url))
+					self.found.add(page)
 		except UnicodeEncodeError:
 			pass
 	
 	def visit_url_external(self, url, found_via):
-		if url in self.done:
-			return # no need to check for one url twice
-		
 		print("Trying external: %s" % url)
 		
 		request = urllib2.Request(url)
