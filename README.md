@@ -15,8 +15,11 @@ Additional options available are:
 
 ```bash
 # Crawl all subsites of http://stefan-koch.name/ for deadlinks (including external deadlinks)
+# Wait one second between opening each URL
 python2.7 crawler.py --wait 1 --restrict http://stefan-koch.name/.* http://stefan-koch.name/
-# Crawl all article pages of example.com for deadlinks. We assume that there are linked articles on the main page
+
+# Crawl all article pages of example.com for deadlinks.
+# We assume that there are linked articles on the main page
 python2.7 crawler.py --restrict http://example.com/article/.+ http://example.com/
 ```
 
