@@ -45,8 +45,7 @@ class Crawler(object):
 			except urllib2.URLError:
 				continue
 		
-		print("DEADLINKS")
-		print(self.deadlinks)
+		self.print_deadlinks(self.deadlinks)
 	
 	def visit_url(self, url, found_via):
 		response = self.check_url(url, found_via)
@@ -98,6 +97,17 @@ class Crawler(object):
 	def excluded(self, url):
 		return self.url_match != None and not self.url_match.search(url)
 	
+	def print_deadlinks(self, deadlinks):
+		if len(deadlinks) == 0:
+			print("No deadlinks were found. Hooray!")
+		else:
+			print("The following deadlinks were found")
+			print()
+			for via in deadlinks:
+				print("%s" % via)
+				for target in deadlinks[via]:
+					print("\t%s" % target)
+
 
 if __name__ == "__main__":
 	parser = argparse.ArgumentParser(description="Search a website for deadlinks")
