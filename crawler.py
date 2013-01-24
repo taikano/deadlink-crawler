@@ -39,23 +39,21 @@ class Crawler(object):
 			next_url = self.pages.pop()
 			
 			try:
-				self.visit_url(next_url)
+				self.visit_url(next_url[0], next_url[1])
 			except urllib2.URLError:
 				continue
 		
 		print("DEADLINKS")
 		print(self.deadlinks)
 	
-	def visit_url(self, url_tuple):
-		if self.url_match.search(url_tuple[0]):
-			self.visit_url_internal(url_tuple[0])
-		else:
-			self.visit_url_external(url_tuple[0], url_tuple[1])
-	
-	def visit_url_internal(self, url):
-		print("Crawling internal: %s" % url)
+	def visit_url(self, url, found_via):
+		response = self.check_url(url, found_via)
 		
-		html = urllib2.urlopen(url)
+		if response != None and self.url_match.search(url):
+			self.collect_new_urls(url, response.read())
+	
+	def collect_new_urls(self, url, html):
+		print("Fetching new URLs from: %s" % url)
 		
 		try:
 			for page in self.extract_urls(html):
@@ -67,8 +65,8 @@ class Crawler(object):
 		except UnicodeEncodeError:
 			pass
 	
-	def visit_url_external(self, url, found_via):
-		print("Trying external: %s" % url)
+	def check_url(self, url, found_via):
+		print("Trying URL: %s" % url)
 		
 		request = urllib2.Request(url)
 		
@@ -77,11 +75,13 @@ class Crawler(object):
 		except (urllib2.HTTPError, httplib.BadStatusLine):
 			# We receive an exception in case of 404
 			self.add_to_deadlinks(url, found_via)
-			return
+			return None
 		
 		status = response.getcode()
 		if status != None and status >= 400:
 			self.add_to_deadlinks(url, found_via)
+		
+		return response
 	
 	def add_to_deadlinks(self, url, found_via):
 		self.deadlinks.setdefault(found_via, [])
