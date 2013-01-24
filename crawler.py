@@ -4,6 +4,8 @@ import re
 import time
 import httplib
 
+import argparse
+
 # TODO: Do not apply wait time to external links
 
 class Crawler(object):
@@ -49,7 +51,7 @@ class Crawler(object):
 	def visit_url(self, url, found_via):
 		response = self.check_url(url, found_via)
 		
-		if response != None and self.url_match.search(url):
+		if response != None and not self.excluded(url):
 			self.collect_new_urls(url, response.read())
 	
 	def collect_new_urls(self, url, html):
@@ -93,8 +95,21 @@ class Crawler(object):
 		soup = BeautifulSoup(page)
 		return [link.get('href') for link in soup.findAll('a')]
 	
+	def excluded(self, url):
+		return self.url_match != None and not self.url_match.search(url)
+	
 
-c = Crawler("http://stefan-koch.name/")
-c.set_url_restrict("http://stefan-koch.name/.*")
-c.set_wait_time(1)
-c.crawl()
+if __name__ == "__main__":
+	parser = argparse.ArgumentParser(description="Search a website for deadlinks")
+	parser.add_argument('url', metavar='URL', type=str, help="The starting point for your crawl")
+	parser.add_argument('--restrict', dest='restrict', help="Restrict the crawl to specific URLs via a regular expression (usually your own domain")
+	parser.add_argument('--wait', dest='wait_time', type=float, help="Set some waiting time between each URL fetch")
+
+	args = parser.parse_args()
+
+	c = Crawler(args.url)
+	if args.restrict:
+		c.set_url_restrict(args.restrict)
+	if args.wait_time:
+		c.set_wait_time(args.wait_time)
+	c.crawl()
