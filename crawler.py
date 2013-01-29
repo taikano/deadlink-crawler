@@ -2,7 +2,6 @@ from BeautifulSoup import BeautifulSoup
 import urllib2, httplib, urlparse
 import re
 import time
-import heapq
 
 import argparse
 
