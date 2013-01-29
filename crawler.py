@@ -6,21 +6,15 @@ import heapq
 
 import argparse
 
+import frontier
+
 class Crawler(object):
 	def __init__(self, init_url):
 		init_domain = urlparse.urlparse(init_url).netloc
 		
-		# A list of urls that still have to be searched sorted by
-		# domains, 
-		self.frontier = {}
-		self.frontier[init_domain] = [(init_url, None)]
-		
-		# A list containing the next crawltimes on domain level, 
-		# to achieve a optimal throughput maintaining a polite policy
-		self.crawltimes = [(time.time(), init_domain)]
-		
-		# Urls we have already visited
-		self.found = set()
+		# Manages our domains we want to visit or have visited
+		self.frontier = frontier.Frontier()
+		self.frontier.add(init_url, None)
 		
 		# List of deadlinks for each URL we have,
 		# i.e. url1: [deadlink1, deadlink2]
@@ -32,10 +26,6 @@ class Crawler(object):
 		
 		# Timeout in seconds to wait, so that we do not kill our server
 		self._wait_time = 0
-		
-		# Timeout for waiting between each call to the same
-		# domain twice, this determines how polite the crawler is
-		self._polite_time = 1
 	
 	@property
 	def restrict(self):
@@ -56,29 +46,21 @@ class Crawler(object):
 	
 	@property
 	def polite_time(self):
-		return self._polite_time
+		return self.frontier.polite_time
 	
 	@polite_time.setter
 	def polite_time(self, seconds):
 		if seconds >= 0:
-			self._polite_time = seconds
+			self.frontier.polite_time = seconds
 	
 	def crawl(self):
 		while len(self.frontier) > 0:
 			time.sleep(self.wait_time)
 			
-			next_time, next_domain = heapq.heappop(self.crawltimes)
-			next_url = self.frontier[next_domain].pop()
+			next_time, next_url = self.frontier.next()
 			
 			while time.time() < next_time:
 				time.sleep(0.5)
-			
-			if len(self.frontier[next_domain]) > 0:
-				next_crawl = time.time() + self.polite_time
-				heapq.heappush(self.crawltimes,
-					(next_crawl, next_domain))
-			else:
-				del(self.frontier[next_domain])
 			
 			try:
 				self.visit_url(next_url[0], next_url[1])
@@ -90,6 +72,8 @@ class Crawler(object):
 	def visit_url(self, url, found_via):
 		response = self.check_url(url, found_via)
 		
+		self.frontier.notify_visit(url)
+		
 		if response != None and not self.excluded(url):
 			self.collect_new_urls(url, response.read())
 	
@@ -99,14 +83,7 @@ class Crawler(object):
 		try:
 			for page in self.extract_urls(html):
 				page = urlparse.urljoin(url, page)
-				domain = urlparse.urlparse(page).netloc
-				
-				if not page in self.found:
-					if not domain in self.frontier:
-						self.frontier.setdefault(domain, [])
-						heapq.heappush(self.crawltimes, (time.time(), domain))
-					self.frontier[domain].append((page, url))
-					self.found.add(page)
+				self.frontier.add(page, url)
 		except UnicodeEncodeError:
 			pass
 	
