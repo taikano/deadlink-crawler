@@ -4,13 +4,10 @@ import heapq
 
 class Frontier(object):
 	def __init__(self):
-		# A list of urls that still have to be searched sorted by
-		# domains, 
-		self.urls = {}
-		
 		# A list containing the next crawltimes on domain level, 
 		# to achieve a optimal throughput maintaining a polite policy
-		self.crawltimes = []
+		self.frontier = []
+		self.websites = {}
 		
 		# Urls we have already found and in our set
 		self.found = set()
@@ -33,31 +30,52 @@ class Frontier(object):
 		domain = urlparse.urlparse(url).netloc
 		
 		# means this is the first URL in our set
-		if not domain in self.urls:
-			self.urls[domain] = []
-			heapq.heappush(self.crawltimes, (time.time(), domain))
+		if domain in self.websites:
+			website = self.websites[domain]
+		else:
+			website = Website(domain)
+			heapq.heappush(self.frontier, (time.time(), website))
+			self.websites[domain] = website
 		
-		self.urls[domain].append((url, found_via))
+		website.add_url(url, found_via)
 		self.found.add(url)
 		
 		return True
 	
 	def next(self):
-		next_time, next_domain = heapq.heappop(self.crawltimes)
+		next_time, next_domain = heapq.heappop(self.frontier)
 		
-		next_url = self.urls[next_domain].pop()
-		
-		if len(self.urls[next_domain]) == 0:
-			del(self.urls[next_domain])
+		next_url = next_domain.next_url()
 		
 		return next_time, next_url
 	
 	def notify_visit(self, url):
 		domain = urlparse.urlparse(url).netloc
-				
+		website = self.websites[domain]
+		
 		# If there are still other urls on this domain to crawl, add crawl time
-		if domain in self.urls:
-			heapq.heappush(self.crawltimes, (time.time() + self.polite_time, domain))
+		if len(website.urls) > 0:
+			heapq.heappush(self.frontier, (time.time() + self.polite_time, website))
+		else:
+			del(self.websites[domain])
 	
 	def __len__(self):
-		return sum([len(self.urls[domain]) for domain in self.urls])
+		return sum([len(website.urls) for time, website 
+			in self.frontier])
+
+
+class Website(object):
+	def __init__(self, domain):
+		self.domain = domain
+		self.urls = []
+		self.robots = None
+	
+	def is_allowed(self, url):
+		# TODO
+		return True
+	
+	def add_url(self, url, found_via):
+		self.urls.append((url, found_via))
+	
+	def next_url(self):
+		return self.urls.pop()

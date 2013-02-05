@@ -72,7 +72,7 @@ class Crawler(object):
 		response = self.check_url(url, found_via)
 		
 		self.frontier.notify_visit(url)
-		
+			
 		if response != None and not self.excluded(url):
 			self.collect_new_urls(url, response.read())
 	
@@ -82,6 +82,7 @@ class Crawler(object):
 		try:
 			for page in self.extract_urls(html):
 				page = urlparse.urljoin(url, page)
+				print("adding page %s" % page)
 				self.frontier.add(page, url)
 		except UnicodeEncodeError:
 			pass
