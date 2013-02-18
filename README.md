@@ -3,6 +3,11 @@ Deadlink crawler
 
 This is a small crawler searching your website for deadlinks.
 
+Dependencies
+------------
+
+This program requires **BeautifulSoup**.
+
 Via command line
 ----------------
 
