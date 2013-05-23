@@ -1,13 +1,12 @@
 Deadlink crawler
 ================
 
-This is a small crawler searching your website for deadlinks.
+This is a small crawler searching a website for deadlinks.
 
 Dependencies
 ------------
 
-This program requires **BeautifulSoup** which can be installed using e.g.
-
+This program requires **BeautifulSoup** which can be installed using e.g.:  
 `sudo easy_install beautifulsoup`
 
 Via command line
@@ -17,14 +16,16 @@ There is a CLI interface to use the crawler. You **must** pass an URL as the sta
 
 Additional options available are:
 
-- `--restrict`: Pass a regular expression for restricting your URL to a subset of all websites it finds. Defaults to domain of start URL.
-- `--wait`: Set some time for waiting in seconds between each URL opening.
-- `--politeness`: Set the time to wait between calling two URLs of the same domain
+- `--restrict`: Restrict crawl to pages with URLs matching the given regular expression
+  - If not specified, defaults to all pages within the domain of the start URL
+- `--wait`: Time (s) to wait between each URL opening
+- `--politeness`: Time to wait (s) between calling two URLs in the same domain
 - `--exclude`: Exclude URLs matching the given regex from the crawl
 - `--silent`: Turn off verbose output. Only print summary at the end.
 - `--debug`: Be super-verbose, printing all links found on each page
 - `--report40x`: Report only 404 as dead, not the other 40x errors
 
+Examples:
 ```bash
 # Crawl all subsites of http://stefan-koch.name/ for deadlinks (including external deadlinks)
 # Wait one second between opening each URL
@@ -66,8 +67,8 @@ c.crawl()
 
 License
 -------
-The crawler is licensed under the Apache Software License v2.0, see LICENSE.txt for details
+The crawler is licensed under the Apache Software License v2.0, see [LICENSE.txt](LICENSE.txt) for details
 
 Version history
 ---------------
-See CHANGES.md for complete version history
+See [CHANGES.md](CHANGES.md) for complete version history
