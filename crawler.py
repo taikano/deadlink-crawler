@@ -204,7 +204,7 @@ class Crawler(object):
 			response = urllib2.urlopen(request, timeout=10)
 		except urllib2.HTTPError as e:
 			# We receive an exception in case of 404
-			if (e.code == 403 or e.code == 401 or e.code == 407) and not self._report40x:
+			if (e.code == 403 or e.code == 401 or e.code == 407 or e.code == 415) and not self._report40x:
 				if self._debug:
 					print "Got HTTP %s - not adding to deadlinks list (control with --report40x=True)" % (e.code)
 			else:
