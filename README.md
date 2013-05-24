@@ -18,8 +18,8 @@ Additional options available are:
 
 - `--restrict`: Restrict crawl to pages with URLs matching the given regular expression
   - If not specified, defaults to all pages within the domain of the start URL
-- `--wait`: Time (s) to wait between each URL opening
-- `--politeness`: Time to wait (s) between calling two URLs in the same domain
+- `--wait`: Time (s) to wait between each URL opening. Default=0
+- `--politeness`: Time to wait (s) between calling two URLs in the same domain. Default=1
 - `--exclude`: Exclude URLs matching the given regex from the crawl and from deadlink-checking
 - `--silent`: Turn off verbose output. Only print summary at the end.
 - `--debug`: Be super-verbose, printing all links found on each page
