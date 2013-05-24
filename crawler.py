@@ -23,7 +23,7 @@ import re
 import time
 import sys
 import argparse
-
+import socket
 import frontier
 
 class Crawler(object):
@@ -63,6 +63,7 @@ class Crawler(object):
 		self._pages = 0
 		self._links = 0
 		self._via = 0
+		self._dead = 0
 	
 	@property
 	def restrict(self):
@@ -146,14 +147,11 @@ class Crawler(object):
 		
 		self.print_deadlinks(self.deadlinks)
 
-		_dead = 0
-		for via in self.deadlinks:
-			_dead += len(via)
 		_elapsed = time.time() - _starttime
 		
 		print "\nSummary:\n--------"
 		print "Crawled %d pages and checked %d links in %s time." % (self._pages, self._links, strftime("%H:%M:%S", gmtime(_elapsed)))
-		print "Found a total of %d deadlinks in %d different pages" % (_dead, self._via)
+		print "Found a total of %d deadlinks in %d different pages" % (self._dead, self._via)
 		
 		if len(self.deadlinks) == 0:
 			exit(0)
@@ -161,9 +159,6 @@ class Crawler(object):
 			exit(2)
 	
 	def visit_url(self, url, found_via):
-		self._pages += 1
-		if self._pages % 100 == 0:
-			print >> sys.stderr, "Processed %s urls" % self._pages
 		response = self.check_url(url, found_via)
 		
 		self.frontier.notify_visit(url)
@@ -175,24 +170,38 @@ class Crawler(object):
 		if self._verbose:
 			print("Processing %s" % url)
 		
+		# Keep track of how many of our site's pages we have crawled, and print status now and then
+		self._pages += 1
+		if self._pages % 100 == 0:
+			print >> sys.stderr, "Processed %s links from %s pages" % (self._links, self._pages)
+
 		try:
 			for page in self.extract_urls(html):
 				page = urlparse.urljoin(url, page)
-				if self.frontier.add(page, url):
+				if self._exclude != None and self._exclude.search(page):
 					if self._debug:
-						print("adding page %s" % page)
+						print "Not adding link %s to crawl backlog (excluded by --exclude rule)" % page
+				else:
+					if self.frontier.add(page, url):
+						if self._debug:
+							print("Adding link %s to crawl backlog" % page)
 		except UnicodeEncodeError:
 			pass
 	
 	def check_url(self, url, found_via):
+		if self._exclude != None and self._exclude.search(url):
+			if self._debug:
+				print "Not checking URL %s (excluded by --exclude rule)" % url
+			return None
+		
 		if self._debug:
 			print("Checking URL: %s" % url)
-		
+
 		self._links += 1
 		request = urllib2.Request(url)
 		
 		try:
-			response = urllib2.urlopen(request, None, 10)
+			response = urllib2.urlopen(request, timeout=10)
 		except urllib2.HTTPError as e:
 			# We receive an exception in case of 404
 			if (e.code == 403 or e.code == 401 or e.code == 407) and not self._report40x:
@@ -204,11 +213,22 @@ class Crawler(object):
 				self.add_to_deadlinks(url, found_via)
 			return None
 		except httplib.BadStatusLine:
+			if self._verbose:
+				print "Got Exception BadStatusLine for url %s - Adding to deadlinks list" % url
 			self.add_to_deadlinks(url, found_via)
 			return None		  
 		except UnicodeEncodeError:
 			if self._verbose:
 				print "Got UnicodeEncodeError for url %s, skipping" % url
+			return None
+		except urllib2.URLError as e:
+			if self._verbose:
+				print "Got URLError for page %s" % url
+			return None
+		except socket.timeout as e:
+			print type(e)    #catched
+			if self._verbose:
+				print "Got timeout reading page %s, skipping" % url
 			return None
 		
 		status = response.getcode()
@@ -226,8 +246,10 @@ class Crawler(object):
 		self.deadlinks.setdefault(found_via, [])
 		self.deadlinks[found_via].append(url)
 		
+		self._dead += 1
+		
 		if self._verbose:
-			print("Found new deadlink %s on %s" % (url, found_via))
+			print "  Found deadlink: %s" % url
 	
 	def extract_urls(self, page):
 		soup = BeautifulSoup(page)
@@ -242,9 +264,9 @@ class Crawler(object):
 	
 	def print_deadlinks(self, deadlinks):
 		if len(deadlinks) == 0:
-			print("No deadlinks were found. Hooray!")
+			print("\nNo deadlinks were found. Hooray!")
 		else:
-			print("The following deadlinks were found\n")
+			print("\nThe following deadlinks were found\n")
 			for via in deadlinks:
 				self._via += 1
 				print("%s" % via)
@@ -258,7 +280,7 @@ if __name__ == "__main__":
 	parser.add_argument('--restrict', dest='restrict', help="Restrict the crawl to specific URLs via a regular expression (usually your own domain")
 	parser.add_argument('--wait', dest='wait_time', type=float, help="Set some waiting time between each URL fetch")
 	parser.add_argument('--politeness', dest='polite_time', type=float, help="Set the time to wait between calling two URLs of the same domain")
-	parser.add_argument('--exclude', dest='exclude', help="Exclude URLs matching the given regex")
+	parser.add_argument('--exclude', dest='exclude', help="Exclude URLs matching the given regex from crawl and deadlink-checking")
 	parser.add_argument('--silent', dest='silent', action='store_true', default=False, help="Turn off verbose output")
 	parser.add_argument('--debug', dest='debug', action='store_true', default=False, help="Be super-verbose")
 	parser.add_argument('--report40x', dest='report40x', action='store_true', default=False, help="Report only 404 as dead, not the other 40x errors")

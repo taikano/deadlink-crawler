@@ -13,7 +13,7 @@ New features in this release:
    * option `silent`: Be completely silent. Only print summary at the end. Nice for piping to script.
    * option `debug`: Be super-verbose, printing all links found on each page
  * option `report40x`: Report only 404 as dead, not the other 40x errors
- * option `exclude`: Exclude URLs matching the given regex from the crawl
+ * option `exclude`: Exclude URLs matching the given regex from the crawl and deadlink-checking
 
 Bug fixes:
 

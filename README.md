@@ -20,7 +20,7 @@ Additional options available are:
   - If not specified, defaults to all pages within the domain of the start URL
 - `--wait`: Time (s) to wait between each URL opening
 - `--politeness`: Time to wait (s) between calling two URLs in the same domain
-- `--exclude`: Exclude URLs matching the given regex from the crawl
+- `--exclude`: Exclude URLs matching the given regex from the crawl and from deadlink-checking
 - `--silent`: Turn off verbose output. Only print summary at the end.
 - `--debug`: Be super-verbose, printing all links found on each page
 - `--report40x`: Report only 404 as dead, not the other 40x errors
