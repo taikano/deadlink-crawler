@@ -177,6 +177,8 @@ class Crawler(object):
 
 		try:
 			for page in self.extract_urls(html):
+				if page != None:
+					page = page.strip() # Handle some malformed links
 				page = urlparse.urljoin(url, page)
 				if self._exclude != None and self._exclude.search(page):
 					if self._debug:
