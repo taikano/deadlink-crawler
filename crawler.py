@@ -129,13 +129,13 @@ class Crawler(object):
     def crawl(self):
         _starttime = time.time()
         if self.restrict is None:
-            self.restrict = "http://%s.*" % self.init_domain
+            self.restrict = "https?://%s.*" % self.init_domain
 
-        print("Deadlink-crawler version 1.1")
+        print("Deadlink-crawler version 1.2")
         print("Starting crawl from URL %s at %s with restriction %s\n"
               % (self.init_url,
                  time.strftime("%Y-%m-%d %H:%M:%S", time.gmtime()),
-                 "http://%s.*" % self.init_domain))
+                 self.restrict.pattern))
 
         while len(self.frontier) > 0:
             time.sleep(self.wait_time)

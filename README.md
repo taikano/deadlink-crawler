@@ -6,8 +6,14 @@ This is a small crawler searching a website for deadlinks.
 Dependencies
 ------------
 
-This program requires **BeautifulSoup** which can be installed using e.g.:  
-`sudo easy_install beautifulsoup`
+All dependencies are listed in the `requirements.txt` file. You can create an
+environment with:
+
+```bash
+virtualenv env
+source env/bin/activate
+pip install -r requirements.txt
+```
 
 Via command line
 ----------------
@@ -29,17 +35,17 @@ Examples:
 ```bash
 # Crawl all subsites of http://stefan-koch.name/ for deadlinks (including external deadlinks)
 # Wait one second between opening each URL
-python2.7 crawler.py --wait 1 http://stefan-koch.name/
+python crawler.py --wait 1 http://stefan-koch.name/
 
 # Crawl all article pages of example.com for deadlinks.
 # We assume that there are linked articles on the main page
-python2.7 crawler.py --restrict http://example.com/article/.+ http://example.com/
+python crawler.py --restrict http://example.com/article/.+ http://example.com/
 
 # Crawl all subdomains of example.com, with silent mode and reporting HTTP 40x as dead
-python2.7 crawler.py --silent --report40x --restrict http://.*\.example\.com/.* http://www.example.com/
+python crawler.py --silent --report40x --restrict http://.*\.example\.com/.* http://www.example.com/
 
 # Crawl example.com, excluding print pages and calendars
-python2.7 crawler.py --exclude print|calendar http://www.example.com/
+python crawler.py --exclude print|calendar http://www.example.com/
 ```
 
 

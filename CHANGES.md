@@ -1,5 +1,16 @@
 # Version history for deadlink-crawler
 
+## Version 1.2, May 2018
+This release switches from Python2 to Python3
+
+ * changed code to python3 compability
+ * switch from 8 spaces to 4 spaces per indent
+ * follow both http and https URL in default restriction
+
+Bug fixes:
+
+ * display the correct restriction if a user defined restriction is used
+
 ## Version 1.1, May 2013
 This version was contributed by https://github.com/janhoy
 New features in this release:
