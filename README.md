@@ -29,7 +29,7 @@ Additional options available are:
 - `--exclude`: Exclude URLs matching the given regex from the crawl and from deadlink-checking
 - `--silent`: Turn off verbose output. Only print summary at the end.
 - `--debug`: Be super-verbose, printing all links found on each page
-- `--report40x`: Report only 404 as dead, not the other 40x errors
+- `--report40x`: Report more 40x status codes as error, default mode reports only 404
 
 Examples:
 ```bash
